@@ -1,6 +1,5 @@
 package ch.raphaelfleischlin.android.nfc;
 
-import ch.hslu.pawi.h12.pizzatracker.android.OrderIdentifier;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -10,18 +9,21 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 /**
-* An activity that is able to interact with NFC tags.
-* Provides methods to write to tags and gets notified if data is received from a tag.
-*/
-public abstract class NfcAwareActivity extends Activity implements NfcListener, OnCancelListener {
+ * 
+ * @author Raphael Fleischlin <raphael.fleischlin at gmail.com>
+ */
+public abstract class NfcAwareActivity<T extends Payload> extends Activity implements NfcListener<T>, OnCancelListener {
 	
-	private NfcWrapper nfcWrapper;
+	private NfcWrapper<T> nfcWrapper;
 	private AlertDialog dialog;
+	
+	public NfcAwareActivity(Class<T> clazz) {
+		nfcWrapper = new NfcWrapper<T>(this, clazz);
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		nfcWrapper = new NfcWrapper(this);
 		nfcWrapper.addNfcListener(this);
 	}
 	
@@ -37,8 +39,8 @@ public abstract class NfcAwareActivity extends Activity implements NfcListener, 
 		nfcWrapper.disableReadMode();
 	}
 	
-	protected void prepareWrite(OrderIdentifier order) {
-		nfcWrapper.prepareWrite(order);
+	protected void prepareWrite(T data) {
+		nfcWrapper.prepareWrite(data);
 	}
 	
 	public void onWriteModeEnabled() {

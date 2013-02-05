@@ -1,33 +1,36 @@
 package ch.raphaelfleischlin.android.nfc;
 
-import ch.hslu.pawi.h12.pizzatracker.android.OrderIdentifier;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentFilter.MalformedMimeTypeException;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.util.Log;
 
 /**
-*
-* @author Raphael Fleischlin <raphael.fleischlin@stud.hslu.ch>
-*/
-public class NfcWrapper {
+ *
+ * @author Raphael Fleischlin <raphael.fleischlin at gmail.com>
+ */
+public class NfcWrapper<T extends Payload> {
 
 	private Activity context;
-	private PayloadMapper payloadMapper = new PayloadMapper();
+	private String mimeType;
+	private PayloadMapper<T> payloadMapper;
 	private NfcAdapter nfcAdapter;
 	private PendingIntent pendingIntent;
-	private OrderIdentifier dataToWrite;
+	private T dataToWrite;
 	private boolean writeModeEnabled = false;
-	private NfcListener listener;
+	private NfcListener<T> listener;
 	
-	public NfcWrapper(Activity activity) {
+	public NfcWrapper(Activity activity, Class<T> clazz) {
 		context = activity;
 		nfcAdapter = NfcAdapter.getDefaultAdapter(context);
 		createSelfReferencingIntent();
+		mimeType = clazz.getName();
+		payloadMapper = new PayloadMapper<T>(clazz);
 	}
 	
 	private void createSelfReferencingIntent() {
@@ -45,8 +48,8 @@ public class NfcWrapper {
 	public void enableReadMode() {
 		IntentFilter tagDiscovered = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
 		try {
-			tagDiscovered.addDataType(OrderIdentifier.MIME_TYPE);
-		} catch (Exception e) {
+			tagDiscovered.addDataType(mimeType);
+		} catch (MalformedMimeTypeException e) {
 			Log.e(this.getClass().getName(), "", e);
 		}
 		IntentFilter[] filters = new IntentFilter[] { tagDiscovered };
@@ -61,8 +64,8 @@ public class NfcWrapper {
 		nfcAdapter.disableForegroundDispatch(context);
 	}
 	
-	public void prepareWrite(OrderIdentifier order) {
-		dataToWrite = order;
+	public void prepareWrite(T dataToWrite) {
+		this.dataToWrite = dataToWrite;
 		disableReadMode();
 		enableWriteMode();
 		onWriteModeEnabled();
@@ -120,11 +123,11 @@ public class NfcWrapper {
 	private void writeDataToTag(Intent intent) {
 		Tag nfcTag = getTagFromIntent(intent);
 		NfcDataSource dataSource = new NfcDataSource(nfcTag);
-		NdefMessage message = payloadMapper.mapToMessage(dataToWrite);
 		try {
+			NdefMessage message = payloadMapper.mapToMessage(dataToWrite);
 			dataSource.write(message);
 			onWriteSuccessful();
-		} catch (NfcDataSourceException e) {
+		} catch (Exception e) {
 			onWriteFailed();
 		}
 	}
@@ -146,12 +149,16 @@ public class NfcWrapper {
 		NfcDataSource dataSource = new NfcDataSource(nfcTag);
 		NdefMessage message = dataSource.read();
 		if (message != null) {
-			OrderIdentifier order = payloadMapper.mapToPayload(message);
-			onNewData(order);
+			try {
+				T data = payloadMapper.mapToPayload(message);
+				onNewData(data);
+			} catch (Exception e) {
+				
+			}
 		}
 	}
 	
-	private void onNewData(OrderIdentifier data) {
+	private void onNewData(T data) {
 		if (listener != null) {
 			listener.onNewData(data);
 		}
@@ -161,7 +168,7 @@ public class NfcWrapper {
 		return intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	}
 	
-	public void addNfcListener(NfcListener newListener) {
+	public void addNfcListener(NfcListener<T> newListener) {
 		listener = newListener;
 	}
 }

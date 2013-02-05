@@ -1,12 +1,10 @@
 package ch.raphaelfleischlin.android.nfc;
 
-import ch.hslu.pawi.h12.pizzatracker.android.OrderIdentifier;
-
 /**
-*
-* @author Raphael Fleischlin <raphael.fleischlin@stud.hslu.ch>
-*/
-public interface NfcListener {
+ *
+ * @author Raphael Fleischlin <raphael.fleischlin at gmail.com>
+ */
+public interface NfcListener<T extends Payload> {
 
 	void onWriteModeEnabled();
 	
@@ -14,5 +12,5 @@ public interface NfcListener {
 	
 	void onWriteFailed();
 	
-	void onNewData(OrderIdentifier data);
+	void onNewData(T data);
 }

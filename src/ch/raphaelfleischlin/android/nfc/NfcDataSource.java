@@ -10,9 +10,9 @@ import android.nfc.tech.NdefFormatable;
 import android.util.Log;
 
 /**
-*
-* @author Raphael Fleischlin <raphael.fleischlin@stud.hslu.ch>
-*/
+ *
+ * @author Raphael Fleischlin <raphael.fleischlin at gmail.com>
+ */
 public class NfcDataSource {
 	
 	private static final String LOGTAG = "NfcDataSource";
@@ -23,7 +23,7 @@ public class NfcDataSource {
 		underlayingTag = nfcTag;
 	}
 
-	public void write(NdefMessage message) throws NfcDataSourceException {
+	public void write(NdefMessage message) throws Exception {
 		if (isTagFormatted()) {
 			writeTag(message);
 		} else if (isTagFormatable()) {
@@ -31,7 +31,7 @@ public class NfcDataSource {
 		} else {
 			String error = "NFC tag is not supported!";
 			Log.e(LOGTAG, error);
-			throw new NfcDataSourceException(error);
+			throw new Exception(error);
 		}
 	}
 	
@@ -39,7 +39,7 @@ public class NfcDataSource {
 		return (Ndef.get(underlayingTag) != null);
 	}
 	
-	private void writeTag(NdefMessage message) throws NfcDataSourceException {
+	private void writeTag(NdefMessage message) throws Exception {
 		try {
 			Ndef tagWriter = Ndef.get(underlayingTag);
 			tagWriter.connect();
@@ -49,29 +49,29 @@ public class NfcDataSource {
 		} catch (IOException e) {
 			String error = "Could not write to NFC tag!";
 			Log.e(LOGTAG, error, e);
-			throw new NfcDataSourceException(error, e);
+			throw new Exception(error, e);
 		} catch (FormatException e) {
 			String error = "Could not write to NFC tag due to bad formatted message!";
 			Log.e(LOGTAG, error, e);
-			throw new NfcDataSourceException(error, e);
+			throw new Exception(error, e);
 		}
 	}
 	
-	private void checkIfWritable(Ndef tagWriter) throws NfcDataSourceException {
+	private void checkIfWritable(Ndef tagWriter) throws Exception {
 		if (!tagWriter.isWritable()) {
 			String error = "NFC tag is readonly!";
 			Log.e(LOGTAG, error);
-			throw new NfcDataSourceException(error);
+			throw new Exception(error);
 		}
 	}
 	
-	private void checkSize(Ndef tagWriter, NdefMessage message) throws NfcDataSourceException  {
+	private void checkSize(Ndef tagWriter, NdefMessage message) throws Exception  {
 		int messageSize = message.getByteArrayLength();
 		int maxSize = tagWriter.getMaxSize();
 		if (messageSize > maxSize) {
 			String error = String.format("NFC tag has not enough free space (free: %d, required: %d)!", maxSize, messageSize);
 			Log.e(LOGTAG, error);
-			throw new NfcDataSourceException(error);
+			throw new Exception(error);
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class NfcDataSource {
 		return (NdefFormatable.get(underlayingTag) != null);
 	}
 	
-	private void formatTag(NdefMessage message) throws NfcDataSourceException {
+	private void formatTag(NdefMessage message) throws Exception {
 		try {
 			NdefFormatable tagFormatter = NdefFormatable.get(underlayingTag);
 			tagFormatter.connect();
@@ -87,11 +87,11 @@ public class NfcDataSource {
 		} catch (IOException e) {
 			String error = "Could not format NFC tag!";
 			Log.e(LOGTAG, error, e);
-			throw new NfcDataSourceException(error, e);
+			throw new Exception(error, e);
 		} catch (FormatException e) {
 			String error = "Could not format NFC tag due to bad formatted message!";
 			Log.e(LOGTAG, error, e);
-			throw new NfcDataSourceException(error, e);
+			throw new Exception(error, e);
 		}
 	}
 	
