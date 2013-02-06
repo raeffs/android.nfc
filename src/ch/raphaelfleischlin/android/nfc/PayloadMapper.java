@@ -19,16 +19,16 @@ public class PayloadMapper<T extends Payload> {
 	
 	private static final String LOGTAG = "PayloadMapper";
 	
-	private String mimeType;
+	private Class<T> clazz;
 	
 	public PayloadMapper(Class<T> clazz) {
-		mimeType = clazz.getName();
+		this.clazz = clazz;
 	}
 	
 	public NdefMessage mapToMessage(T payload) throws Exception {
 		NdefRecord record = new NdefRecord(
 				NdefRecord.TNF_MIME_MEDIA,
-				mimeType.getBytes(),
+				getMimeType().getBytes(),
 				new byte[] {},
 				marshalPayload(payload));
 		NdefMessage message = new NdefMessage(record);
@@ -55,7 +55,7 @@ public class PayloadMapper<T extends Payload> {
 		NdefRecord record = message.getRecords()[0];
 		T payload = null;
 		if (NdefRecord.TNF_MIME_MEDIA == record.getTnf()
-				&& mimeType.equals(new String(record.getType()))) {
+				&& getMimeType().equals(new String(record.getType()))) {
 			payload = unmarshalPayload(record.getPayload());
 		}
 		return payload;
@@ -86,6 +86,10 @@ public class PayloadMapper<T extends Payload> {
 		} catch (IOException exception) {
 			Log.e(LOGTAG, "Exception while closing the resource!", exception);
 		}
+	}
+	
+	public String getMimeType() {
+		return String.format("application/%s", clazz.getName());
 	}
 
 }

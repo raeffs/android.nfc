@@ -17,7 +17,6 @@ import android.util.Log;
 public class NfcWrapper<T extends Payload> {
 
 	private Activity context;
-	private String mimeType;
 	private PayloadMapper<T> payloadMapper;
 	private NfcAdapter nfcAdapter;
 	private PendingIntent pendingIntent;
@@ -29,7 +28,6 @@ public class NfcWrapper<T extends Payload> {
 		context = activity;
 		nfcAdapter = NfcAdapter.getDefaultAdapter(context);
 		createSelfReferencingIntent();
-		mimeType = clazz.getName();
 		payloadMapper = new PayloadMapper<T>(clazz);
 	}
 	
@@ -48,7 +46,7 @@ public class NfcWrapper<T extends Payload> {
 	public void enableReadMode() {
 		IntentFilter tagDiscovered = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
 		try {
-			tagDiscovered.addDataType(mimeType);
+			tagDiscovered.addDataType(payloadMapper.getMimeType());
 		} catch (MalformedMimeTypeException e) {
 			Log.e(this.getClass().getName(), "", e);
 		}

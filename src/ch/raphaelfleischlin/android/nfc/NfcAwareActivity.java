@@ -14,16 +14,18 @@ import android.widget.Toast;
  */
 public abstract class NfcAwareActivity<T extends Payload> extends Activity implements NfcListener<T>, OnCancelListener {
 	
+	private Class<T> clazz;
 	private NfcWrapper<T> nfcWrapper;
 	private AlertDialog dialog;
 	
 	public NfcAwareActivity(Class<T> clazz) {
-		nfcWrapper = new NfcWrapper<T>(this, clazz);
+		this.clazz = clazz;
 	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		nfcWrapper = new NfcWrapper<T>(this, clazz);
 		nfcWrapper.addNfcListener(this);
 	}
 	
