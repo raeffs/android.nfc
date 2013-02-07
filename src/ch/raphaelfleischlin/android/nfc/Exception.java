@@ -2,7 +2,7 @@ package ch.raphaelfleischlin.android.nfc;
 
 /**
  *
- * @author Raphael Fleischlin <raphael.fleischlin@stud.hslu.ch>
+ * @author Raphael Fleischlin <raphael.fleischlin at gmail.com>
  */
 public class Exception extends java.lang.Exception {
 	

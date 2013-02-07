@@ -89,7 +89,7 @@ public class PayloadMapper<T extends Payload> {
 	}
 	
 	public String getMimeType() {
-		return String.format("application/%s", clazz.getName());
+		return String.format("application/%s", clazz.getName()).toLowerCase();
 	}
 
 }
