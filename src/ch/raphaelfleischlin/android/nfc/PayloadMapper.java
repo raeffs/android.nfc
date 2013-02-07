@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Locale;
 
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -89,7 +90,7 @@ public class PayloadMapper<T extends Payload> {
 	}
 	
 	public String getMimeType() {
-		return String.format("application/%s", clazz.getName()).toLowerCase();
+		return String.format("application/%s", clazz.getName()).toLowerCase(Locale.getDefault());
 	}
 
 }
